@@ -1,11 +1,8 @@
 import {
-  AlipayCircleOutlined,
   LockTwoTone,
   MailTwoTone,
   MobileTwoTone,
-  TaobaoCircleOutlined,
   UserOutlined,
-  WeiboCircleOutlined,
 } from '@ant-design/icons';
 import { Alert, Space, message, Tabs } from 'antd';
 import React, { useState } from 'react';
@@ -43,6 +40,7 @@ const goto = () => {
 };
 
 const Login: React.FC = () => {
+  //方括号定义了一个 state 变量
   const [submitting, setSubmitting] = useState(false);
   const [userLoginState, setUserLoginState] = useState<API.LoginStateType>({});
   const [type, setType] = useState<string>('account');
@@ -51,21 +49,31 @@ const Login: React.FC = () => {
   const intl = useIntl();
 
   const fetchUserInfo = async () => {
+
+    console.log('initialState-->',initialState);
+    console.log("userLoginState",userLoginState);
     const userInfo = await initialState?.fetchUserInfo?.();
     if (userInfo) {
       setInitialState({
         ...initialState,
         currentUser: userInfo,
+       // token: {id:"11111111"},
       });
     }
   };
+
+
+
+
 
   const handleSubmit = async (values: LoginParamsType) => {
     setSubmitting(true);
     try {
       // 登录
       const msg = await fakeAccountLogin({ ...values, type });
+      console.log("msg",msg);
       if (msg.status === 'ok') {
+        localStorage.setItem("token",msg.data.token)
         message.success('登录成功！');
         await fetchUserInfo();
         goto();
@@ -116,7 +124,7 @@ const Login: React.FC = () => {
               },
             }}
             onFinish={async (values) => {
-              handleSubmit(values as LoginParamsType);
+           await   handleSubmit(values as LoginParamsType);
             }}
           >
             <Tabs activeKey={type} onChange={setType}>
@@ -292,9 +300,9 @@ const Login: React.FC = () => {
           </ProForm>
           <Space className={styles.other}>
             <FormattedMessage id="pages.login.registerAccount" defaultMessage="还没有账号？ 立即注册" />
-            <AlipayCircleOutlined className={styles.icon} />
-            <TaobaoCircleOutlined className={styles.icon} />
-            <WeiboCircleOutlined className={styles.icon} />
+            <Link className={styles.login} to="/user/register">
+              <FormattedMessage id="userandregister.register.sign-in" />
+            </Link>
           </Space>
         </div>
       </div>

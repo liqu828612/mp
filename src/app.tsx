@@ -6,16 +6,26 @@ import type { RequestConfig, RunTimeLayoutConfig } from 'umi';
 import { history } from 'umi';
 import RightContent from '@/components/RightContent';
 import Footer from '@/components/Footer';
-import type { ResponseError } from 'umi-request';
+import type {RequestOptionsInit, ResponseError } from 'umi-request';
 import { queryCurrent,queryMenuData } from './services/user';
 import defaultSettings from '../config/defaultSettings';
-import { SmileOutlined, HeartOutlined,GiftTwoTone } from '@ant-design/icons';
+import { SmileOutlined, HeartOutlined,GiftTwoTone,HomeOutlined,AccountBookOutlined,MoneyCollectOutlined
+  ,SyncOutlined,PayCircleOutlined,ShopOutlined,TransactionOutlined,SettingOutlined} from '@ant-design/icons';
 import {MenuDataItem} from "@@/plugin-layout/runtime";
 //使用到什么图标才取
 const IconMap = {
   smile: <SmileOutlined spin={false} />,
   heart: <HeartOutlined spin={false}/>,
   gift:<GiftTwoTone spin={false} />,
+  home:<HomeOutlined spin={false} />,
+  account:<AccountBookOutlined spin={false} />,
+  collection:<MoneyCollectOutlined spin={false} />,
+  exchange:<SyncOutlined spin={false} />,
+  payment:<PayCircleOutlined spin={false} />,
+  shop:<ShopOutlined spin={false} />,
+  transfer:<TransactionOutlined spin={false} />,
+  setting:<SettingOutlined spin={false} />,
+
 };
 
 
@@ -31,10 +41,16 @@ export async function getInitialState(): Promise<{
   currentUser?: API.CurrentUser;
   fetchUserInfo?: () => Promise<API.CurrentUser | undefined>;
   fetchMenuData?: () => Promise<any|undefined>;
+  fetchTokenInfo?: () => Promise<any|undefined>;
   menuData?: any;
+  token?: any;
 }> {
   // +++-------------------------start
 
+  const fetchTokenInfo = async ()=>{
+   const  token=localStorage.getItem("token");
+   return token;
+  }
   // +++-------------------------end
   const fetchUserInfo = async () => {
     try {
@@ -57,6 +73,8 @@ export async function getInitialState(): Promise<{
     }
     return undefined;
   };
+
+  const token= "";
   // 如果是登录页面，不执行
   if (history.location.pathname !== '/user/login') {
     //const currentUser = await fetchUserInfo();
@@ -66,18 +84,25 @@ export async function getInitialState(): Promise<{
     const currentUser = await fetchUserInfo();
     console.debug("currentUser"+currentUser);
 
+    const token  =await fetchTokenInfo();
+
+
     return {
       fetchUserInfo,
+      fetchTokenInfo,
      // fetchMenuData,
       currentUser,
       menuData,
+      token,
       settings: defaultSettings,
     };
   }
   return {
     fetchUserInfo,
+    fetchTokenInfo,
     menuData: [],
     settings: defaultSettings,
+    token,
   };
 }
 //菜单icon变更
@@ -99,14 +124,17 @@ export const layout: RunTimeLayoutConfig = ({ initialState, }) => {
     onPageChange: () => {
       const { location } = history;
       // 如果没有登录，重定向到 login
-      if (!initialState?.currentUser && location.pathname !== '/user/login') {
+      if (!initialState?.currentUser && location.pathname !== '/user/login'&&location.pathname !== '/user/register') {
         history.push('/user/login');
       }
+
+      //如果kyc没有通过
+
     },
 
     menuHeaderRender: undefined,
     // 自定义 403 页面
-    // unAccessible: <div>unAccessible</div>,
+    // unAccessible: <div>unAccessible kyc开始</div>,
     ...initialState?.settings,
   };
 
@@ -157,6 +185,28 @@ const errorHandler = (error: ResponseError) => {
   throw error;
 };
 
+
+const authHeaderInterceptor = (  url: string, options: RequestOptionsInit ) => {
+
+ // alert("hahahahha"+token);
+
+  const  token = localStorage.getItem("token");
+
+
+
+
+
+  //alert("initialState"+initialState().initialState?.token);
+  //console.log("initialState111",initialState().initialState?.token)
+
+  const authHeader = {'Authorization': 'Bearer '+token}
+  return {
+    url: `${url}`,
+    options: { ...options , interceptors: true, headers: authHeader},
+  };
+}
 export const request: RequestConfig = {
   errorHandler,
+  // 新增自动添加AccessToken的请求前拦截器
+  requestInterceptors: [authHeaderInterceptor],
 };

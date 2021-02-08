@@ -120,8 +120,14 @@ export default {
     if (password === 'ant.design' && username === 'admin') {
       res.send({
         status: 'ok',
+        isSuccess:true,
+        errCode:'0000',
+        errMessage:'请求成功',
         type,
         currentAuthority: 'admin',
+        data:{
+          token:'jwttoken'
+        }
       });
       access = 'admin';
       return;
@@ -203,27 +209,58 @@ export default {
     if (getAccess() === 'admin') {
       res.send([
         {
-          path: '/index',
+          path: '/welcome',
           hideInMenu: false,
-          name: 'index',
-          icon:'smile',
+          name: 'home',
+          icon:'home',
         },
         {
-          path: '/',
-          name: 'welcome',
-          children: [
-            {
-              path: '/welcome',
-              name: 'one',
-              children: [
-                {
-                  path: '/welcome/welcome',
-                  name: 'two',
-                  exact: true,
-                },
-              ],
-            },
-          ],
+          path: '/list',
+          hideInMenu: false,
+          name: 'account',
+          icon:'account',
+          children: [{
+            path:'/list',
+            hideInMenu: false,
+            icon:'account',
+            name: 'account',
+          }]
+        },
+        {
+          path: '/collection',
+          hideInMenu: false,
+          name: 'collection',
+          icon:'collection',
+        },
+        {
+          path: '/exchange',
+          hideInMenu: false,
+          name: 'exchange',
+          icon:'exchange',
+        },
+        {
+          path: '/payment',
+          hideInMenu: false,
+          name: 'payment',
+          icon:'payment',
+        },
+        {
+          path: '/shop',
+          hideInMenu: false,
+          name: 'shop',
+          icon:'shop',
+        },
+        {
+          path: '/transfer',
+          hideInMenu: false,
+          name: 'transfer',
+          icon:'transfer',
+        },
+        {
+          path: '/setting',
+          hideInMenu: false,
+          name: 'setting',
+          icon:'setting',
         },
         {
           path: '/list/:id',
